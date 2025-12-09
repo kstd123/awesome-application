@@ -18,12 +18,33 @@ export class InfraStack extends cdk.Stack {
       encryption: s3.BucketEncryption.S3_MANAGED,
     });
 
+    // CloudFront function: rewrite `/path` -> `/path/index.html` when no extension
+    const rewriteFunction = new cloudfront.Function(this, 'SpaRewrite', {
+      code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+  if (uri.endsWith('/')) return request;
+  if (!uri.includes('.')) {
+    request.uri = uri + '/index.html';
+  }
+  return request;
+}
+`),
+    });
+
     // CloudFront Distribution
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
       defaultBehavior: {
         origin: new origins.S3Origin(websiteBucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        functionAssociations: [
+          {
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+            function: rewriteFunction,
+          },
+        ],
       },
       defaultRootObject: 'index.html',
       errorResponses: [
