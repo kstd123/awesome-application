@@ -30,7 +30,12 @@ export class InfraStack extends cdk.Stack {
         {
           httpStatus: 404,
           responseHttpStatus: 200,
-          responsePagePath: '/index.html', // For SPA routing if needed, though this is static export
+          responsePagePath: '/index.html', // SPA fallback
+        },
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html', // Handle S3 AccessDenied for client-routed paths
         },
       ],
     });

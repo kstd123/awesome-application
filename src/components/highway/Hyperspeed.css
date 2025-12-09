@@ -1,0 +1,13 @@
+/* Hyperspeed.css */
+#lights {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    background-color: black;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+}
